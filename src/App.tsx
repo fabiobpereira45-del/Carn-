@@ -17,6 +17,45 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
+
+// --- Pix Helpers ---
+function crc16(data: string): string {
+  let crc = 0xFFFF;
+  const polynomial = 0x1021;
+  for (let i = 0; i < data.length; i++) {
+    crc ^= (data.charCodeAt(i) << 8);
+    for (let j = 0; j < 8; j++) {
+      if ((crc & 0x8000) !== 0) {
+        crc = (crc << 1) ^ polynomial;
+      } else {
+        crc <<= 1;
+      }
+    }
+  }
+  return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
+function generatePixPayload(key: string, name: string, city: string = 'SAO PAULO'): string {
+  const cleanKey = key.replace(/\D/g, '');
+  const cleanName = name.substring(0, 25).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z ]/g, "");
+  const cleanCity = city.substring(0, 15).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z ]/g, "");
+
+  const formatIdentifier = '000201';
+  const gui = 'br.gov.bcb.pix';
+  const guiField = `00${gui.length.toString().padStart(2, '0')}${gui}`;
+  const keyField = `01${cleanKey.length.toString().padStart(2, '0')}${cleanKey}`;
+  const merchantAccountInfo = `26${(guiField.length + keyField.length).toString().padStart(2, '0')}${guiField}${keyField}`;
+  const merchantCategoryCode = '52040000';
+  const transactionCurrency = '5303986';
+  const countryCode = '5802BR';
+  const merchantNameField = `59${cleanName.length.toString().padStart(2, '0')}${cleanName}`;
+  const merchantCityField = `60${cleanCity.length.toString().padStart(2, '0')}${cleanCity}`;
+  const additionalDataField = '62070503***';
+  
+  const payloadWithoutCRC = `${formatIdentifier}${merchantAccountInfo}${merchantCategoryCode}${transactionCurrency}${countryCode}${merchantNameField}${merchantCityField}${additionalDataField}6304`;
+  return `${payloadWithoutCRC}${crc16(payloadWithoutCRC)}`;
+}
 
 // --- Types ---
 interface SchoolData {
@@ -135,57 +174,72 @@ const Via = ({ school, studentName, responsavelName, value, monthName, year, ins
   </div>
 );
 
-const CoverSheet = ({ school, studentName, responsavelName, year }: any) => (
-  <div className="flex w-full h-full items-center justify-between p-4 print:p-0">
-    <div className="border-2 border-brand-900 rounded-2xl w-full h-full flex flex-row items-center p-3 md:p-5 relative overflow-hidden bg-white gap-4 shadow-inner">
-      <div className="absolute top-0 left-0 w-2 h-full bg-brand-600"></div>
-      <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-brand-50 rounded-full opacity-50"></div>
-      
-      {/* Left: Logo & Title */}
-      <div className="flex flex-col items-center justify-center gap-1.5 w-[45%] z-10">
-        {school.logoUrl ? (
-          <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-50">
-             <img src={school.logoUrl} alt="Logo" className="h-10 md:h-12 object-contain" />
+const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
+  const pixPayload = generatePixPayload('71988628791', school.name || 'INSTITUICAO');
+
+  return (
+    <div className="flex w-full h-full items-center justify-between p-4 print:p-0">
+      <div className="border-2 border-brand-900 rounded-2xl w-full h-full flex flex-row items-center p-3 md:p-5 relative overflow-hidden bg-white gap-4 shadow-inner">
+        <div className="absolute top-0 left-0 w-2 h-full bg-brand-600"></div>
+        <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-brand-50 rounded-full opacity-50"></div>
+        
+        {/* Left: Logo & Title */}
+        <div className="flex flex-col items-center justify-center gap-1.5 w-[35%] z-10 border-r border-gray-100 pr-4">
+          {school.logoUrl ? (
+            <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-50">
+               <img src={school.logoUrl} alt="Logo" className="h-10 md:h-12 object-contain" />
+            </div>
+          ) : (
+            <div className="h-12 w-12 bg-brand-50 border border-brand-200 border-dashed flex items-center justify-center rounded-2xl text-brand-400 text-xs shrink-0">
+              <School className="w-6 h-6" />
+            </div>
+          )}
+          <div className="text-center">
+            <h1 className="text-sm md:text-base font-black text-brand-900 uppercase tracking-tight leading-tight">{school.name || 'NOME DA ESCOLA'}</h1>
+            <h2 className="text-[7px] text-gray-500 uppercase tracking-[0.1em] font-semibold">{school.subtitle || 'Educação e Transformação'}</h2>
           </div>
-        ) : (
-          <div className="h-12 w-12 bg-brand-50 border border-brand-200 border-dashed flex items-center justify-center rounded-2xl text-brand-400 text-xs shrink-0">
-            <School className="w-6 h-6" />
-          </div>
-        )}
-        <div className="text-center">
-          <h1 className="text-sm md:text-base font-black text-brand-900 uppercase tracking-tight leading-tight">{school.name || 'NOME DA ESCOLA'}</h1>
-          <h2 className="text-[7px] text-gray-500 uppercase tracking-[0.1em] font-semibold">{school.subtitle || 'Educação e Transformação'}</h2>
-        </div>
-      </div>
-      
-      {/* Right: Info */}
-      <div className="flex-1 space-y-2 z-10 border-l border-gray-100 pl-6 py-1">
-        <div className="flex flex-col">
-          <span className="text-[7px] font-bold text-brand-600 uppercase tracking-widest leading-none mb-0.5">Carnê de Pagamento</span>
-          <span className="text-sm font-black text-gray-900 leading-none">ANO LETIVO {year}</span>
         </div>
         
-        <div className="grid grid-cols-1 gap-1.5 pt-1">
-          <div className="flex flex-col border-l border-brand-200 pl-2">
-            <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Aluno(a)</span>
-            <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{studentName || '__________________'}</span>
+        {/* Middle: Info */}
+        <div className="flex-1 space-y-2 z-10 py-1">
+          <div className="flex flex-col">
+            <span className="text-[7px] font-bold text-brand-600 uppercase tracking-widest leading-none mb-0.5">Carnê de Pagamento</span>
+            <span className="text-sm font-black text-gray-900 leading-none">ANO LETIVO {year}</span>
           </div>
           
-          <div className="flex flex-col border-l border-brand-200 pl-2">
-            <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Grupo/ano</span>
-            <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{responsavelName || '__________________'}</span>
+          <div className="grid grid-cols-1 gap-1.5 pt-1">
+            <div className="flex flex-col border-l border-brand-200 pl-2">
+              <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Aluno(a)</span>
+              <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{studentName || '__________________'}</span>
+            </div>
+            
+            <div className="flex flex-col border-l border-brand-200 pl-2">
+              <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Grupo/ano</span>
+              <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{responsavelName || '__________________'}</span>
+            </div>
+          </div>
+  
+          <div className="pt-1.5 flex items-center justify-between border-t border-gray-50 mt-1">
+            <div className="text-[7px] text-gray-400 w-full leading-tight truncate">
+              {school.address} {school.cnpj ? `| CNPJ: ${school.cnpj}` : ''}
+            </div>
           </div>
         </div>
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-50 mt-1">
-          <div className="text-[7px] text-gray-400 w-full leading-tight truncate">
-            {school.address} {school.cnpj ? `| CNPJ: ${school.cnpj}` : ''}
+        {/* Right: Pix Payment */}
+        <div className="w-[25%] flex flex-col items-center justify-center gap-1.5 p-2 bg-brand-50 rounded-2xl border border-brand-100 z-10">
+          <span className="text-[6px] font-black text-brand-900 uppercase tracking-tighter text-center leading-tight">
+            Pagamentos em PIX<br/>até dia 10 pague com desconto
+          </span>
+          <div className="bg-white p-1 rounded-lg shadow-sm border border-brand-200">
+            <QRCodeSVG value={pixPayload} size={50} />
           </div>
+          <span className="text-[5px] font-bold text-gray-400 uppercase tracking-widest">Copia e Cola</span>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function App() {
   // --- State ---
