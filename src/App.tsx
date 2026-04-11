@@ -328,6 +328,12 @@ export default function App() {
     window.print();
   };
 
+  const resetAll = () => {
+    if (confirm("Deseja limpar todos os dados do carnê e da escola?")) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
 
   const addToBatch = () => {
     if (!config.studentName) {
