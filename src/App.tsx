@@ -17,7 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QRCodeSVG } from 'qrcode.react';
+
 
 // --- Pix Helpers ---
 function crc16(data: string): string {
@@ -232,7 +232,11 @@ const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
             Pagamentos em PIX<br/>até dia 10 pague com desconto
           </span>
           <div className="bg-white p-1 rounded-lg shadow-sm border border-brand-200">
-            <QRCodeSVG value={pixPayload} size={50} />
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pixPayload)}`} 
+              alt="Pix QR Code" 
+              className="w-12 h-12"
+            />
           </div>
           <span className="text-[5px] font-bold text-gray-400 uppercase tracking-widest">Copia e Cola</span>
         </div>
