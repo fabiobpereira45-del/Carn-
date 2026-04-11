@@ -12,7 +12,9 @@ import {
   CheckCircle2, 
   Download,
   Info,
-  LayoutDashboard
+  LayoutDashboard,
+  Layers,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -33,6 +35,13 @@ interface InstallmentConfig {
   startYear: number;
   totalInstallments: number;
   dueDay: string;
+}
+
+interface BatchCoverItem {
+  id: string;
+  studentName: string;
+  responsavelName: string;
+  year: number;
 }
 
 // --- Constants ---
@@ -207,6 +216,12 @@ export default function App() {
   });
 
   const [isPrinting, setIsPrinting] = useState(false);
+  const [includeCover, setIncludeCover] = useState(false);
+  const [isBatchPrinting, setIsBatchPrinting] = useState(false);
+  const [batchCovers, setBatchCovers] = useState<BatchCoverItem[]>(() => {
+    const saved = localStorage.getItem('batch_covers');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // --- Effects ---
   useEffect(() => {
@@ -216,6 +231,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('carnê_config', JSON.stringify(config));
   }, [config]);
+
+  useEffect(() => {
+    localStorage.setItem('batch_covers', JSON.stringify(batchCovers));
+  }, [batchCovers]);
 
   // --- Handlers ---
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,18 +270,42 @@ export default function App() {
     window.print();
   };
 
-  const resetAll = () => {
-    if (confirm("Deseja limpar todos os dados do formulário?")) {
-      setConfig({
-        studentName: '',
-        responsavelName: '',
-        value: '',
-        startMonth: 0,
-        startYear: new Date().getFullYear(),
-        totalInstallments: 12,
-        dueDay: '10'
-      });
+
+  const addToBatch = () => {
+    if (!config.studentName) {
+      alert("Por favor, preencha o nome do aluno.");
+      return;
     }
+    const newItem: BatchCoverItem = {
+      id: Date.now().toString(),
+      studentName: config.studentName,
+      responsavelName: config.responsavelName,
+      year: config.startYear
+    };
+    setBatchCovers(prev => [...prev, newItem]);
+    alert("Capa adicionada à fila com sucesso!");
+  };
+
+  const removeFromBatch = (id: string) => {
+    setBatchCovers(prev => prev.filter(item => item.id !== id));
+  };
+
+  const clearBatch = () => {
+    if (confirm("Deseja limpar toda a fila de capas?")) {
+      setBatchCovers([]);
+    }
+  };
+
+  const handlePrintBatch = () => {
+    if (batchCovers.length === 0) {
+      alert("A fila de capas está vazia.");
+      return;
+    }
+    setIsBatchPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setIsBatchPrinting(false);
+    }, 500);
   };
 
   return (
@@ -282,6 +325,13 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button 
+              onClick={handlePrintBatch}
+              className="bg-white text-brand-600 border border-brand-200 px-4 py-2.5 rounded-xl hover:bg-brand-50 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm"
+            >
+              <Layers className="w-4 h-4" />
+              Capas em Lote ({batchCovers.length})
+            </button>
             <button 
               onClick={handlePrint}
               className="bg-brand-600 text-white px-6 py-2.5 rounded-xl hover:bg-brand-700 active:scale-95 transition-all flex items-center gap-2 font-bold shadow-xl shadow-brand-100 text-sm"
@@ -401,15 +451,47 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4">
-                      <button 
-                        onClick={resetAll}
-                        className="text-[10px] font-black uppercase text-red-400 hover:text-red-600 transition-colors flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3 h-3" /> Limpar Tudo
-                      </button>
-                      <div className="text-[10px] text-gray-400 font-medium italic">Dados salvos automaticamente</div>
+                    <div className="flex items-center justify-between pt-4 gap-4">
+                      <div className="flex gap-4">
+                        <button 
+                          onClick={resetAll}
+                          className="text-[10px] font-black uppercase text-red-400 hover:text-red-600 transition-colors flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" /> Limpar
+                        </button>
+                        <button 
+                          onClick={addToBatch}
+                          className="text-[10px] font-black uppercase text-brand-600 hover:text-brand-800 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" /> Fila de Capas
+                        </button>
+                      </div>
+                      <div className="text-[10px] text-gray-400 font-medium italic">Auto-save ativo</div>
                     </div>
+
+                    {batchCovers.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                             <Layers className="w-3 h-3" /> Fila de Capas ({batchCovers.length})
+                          </h4>
+                          <button onClick={clearBatch} className="text-[9px] font-bold text-red-400 hover:text-red-600">Limpar Fila</button>
+                        </div>
+                        <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                          {batchCovers.map(item => (
+                            <div key={item.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border border-gray-100 group">
+                              <div className="flex flex-col">
+                                <span className="text-[11px] font-bold text-gray-900 truncate max-w-[180px]">{item.studentName}</span>
+                                <span className="text-[9px] text-gray-500">{item.responsavelName}</span>
+                              </div>
+                              <button onClick={() => removeFromBatch(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ) : (
                   <motion.div 
@@ -516,7 +598,18 @@ export default function App() {
             <h3 className="font-black text-gray-400 uppercase text-xs tracking-widest flex items-center gap-2">
               <LayoutDashboard className="w-4 h-4" /> Live Preview
             </h3>
-            <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-[10px] font-bold">A4 Landscape Match</span>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={includeCover} 
+                  onChange={e => setIncludeCover(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                />
+                <span className="text-[10px] font-bold text-gray-500 group-hover:text-brand-600 transition-colors uppercase tracking-widest">Incluir Capa</span>
+              </label>
+              <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">A4 Landscape Match</span>
+            </div>
           </div>
 
           {/* This wrapper scales the large A4 content to fit the screen visually */}
@@ -527,56 +620,77 @@ export default function App() {
                 {/* Real A4 Size Container */}
                 <div className="mx-auto w-full print:w-full space-y-0.5 bg-white shadow-sm print:shadow-none">
                   
-                  {/* Capa */}
-                  <div className="h-[52mm] w-full border-b-2 border-brand-100 box-border print-break-after-page bg-white flex items-center justify-center">
-                    <CoverSheet 
-                      school={school} 
-                      studentName={config.studentName} 
-                      responsavelName={config.responsavelName} 
-                      year={config.startYear} 
-                    />
-                  </div>
-                  
-                  {/* Parcelas */}
-                  {getInstallments().map((inst, index) => (
-                    <div key={index} className="h-[48mm] w-full border-b border-gray-200 box-border print-break-inside-avoid bg-white flex relative group/item">
-                      <Via 
-                        school={school}
-                        studentName={config.studentName} 
-                        responsavelName={config.responsavelName} 
-                        value={config.value} 
-                        monthName={inst.monthName} 
-                        year={inst.year}
-                        installmentNum={inst.num}
-                        totalInstallments={config.totalInstallments}
-                        dueDay={config.dueDay}
-                        isCanhoto={true} 
-                      />
-                      
-                      <div className="relative flex flex-col justify-center items-center w-0 z-10 print-hidden">
-                         <div className="border-l border-brand-500/20 h-full absolute"></div>
-                         <div className="bg-brand-50 p-1 rounded-full absolute -ml-[9px] text-brand-300">
-                           <Scissors className="w-2 h-2" />
-                         </div>
-                      </div>
-
-                      <Via 
-                        school={school}
-                        studentName={config.studentName} 
-                        responsavelName={config.responsavelName} 
-                        value={config.value} 
-                        monthName={inst.monthName} 
-                        year={inst.year}
-                        installmentNum={inst.num}
-                        totalInstallments={config.totalInstallments}
-                        dueDay={config.dueDay}
-                        isCanhoto={false} 
-                      />
-                      
-                      {/* Interaction overlay in preview only */}
-                      <div className="absolute inset-0 bg-brand-500/0 hover:bg-brand-500/5 transition-colors cursor-default z-0 pointer-events-none print:hidden" />
+                  {isBatchPrinting ? (
+                    /* Batch Printing View */
+                    <div className="grid grid-cols-1 gap-0.5 w-full">
+                      {batchCovers.map((item, idx) => (
+                        <div key={item.id} className={`h-[52mm] w-full border-b border-gray-100 box-border flex items-center justify-center ${ (idx + 1) % 4 === 0 ? 'print-break-after-page' : '' }`}>
+                          <CoverSheet 
+                            school={school} 
+                            studentName={item.studentName} 
+                            responsavelName={item.responsavelName} 
+                            year={item.year} 
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    /* Normal Carnê View */
+                    <>
+                      {/* Capa */}
+                      {includeCover && (
+                        <div className="h-[52mm] w-full border-b-2 border-brand-100 box-border print-break-after-page bg-white flex items-center justify-center">
+                          <CoverSheet 
+                            school={school} 
+                            studentName={config.studentName} 
+                            responsavelName={config.responsavelName} 
+                            year={config.startYear} 
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Parcelas */}
+                      {getInstallments().map((inst, index) => (
+                        <div key={index} className="h-[48mm] w-full border-b border-gray-200 box-border print-break-inside-avoid bg-white flex relative group/item">
+                          <Via 
+                            school={school}
+                            studentName={config.studentName} 
+                            responsavelName={config.responsavelName} 
+                            value={config.value} 
+                            monthName={inst.monthName} 
+                            year={inst.year}
+                            installmentNum={inst.num}
+                            totalInstallments={config.totalInstallments}
+                            dueDay={config.dueDay}
+                            isCanhoto={true} 
+                          />
+                          
+                          <div className="relative flex flex-col justify-center items-center w-0 z-10 print-hidden">
+                             <div className="border-l border-brand-500/20 h-full absolute"></div>
+                             <div className="bg-brand-50 p-1 rounded-full absolute -ml-[9px] text-brand-300">
+                               <Scissors className="w-2 h-2" />
+                             </div>
+                          </div>
+
+                          <Via 
+                            school={school}
+                            studentName={config.studentName} 
+                            responsavelName={config.responsavelName} 
+                            value={config.value} 
+                            monthName={inst.monthName} 
+                            year={inst.year}
+                            installmentNum={inst.num}
+                            totalInstallments={config.totalInstallments}
+                            dueDay={config.dueDay}
+                            isCanhoto={false} 
+                          />
+                          
+                          {/* Interaction overlay in preview only */}
+                          <div className="absolute inset-0 bg-brand-500/0 hover:bg-brand-500/5 transition-colors cursor-default z-0 pointer-events-none print:hidden" />
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
 
               </div>
