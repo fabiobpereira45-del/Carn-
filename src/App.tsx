@@ -89,87 +89,87 @@ const months = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
 ];
 
+const SCHOOL_CLASSES = [
+  "G2", "G3", "G4", "G5", "1º ano", "2º ano", "3º ano", "4º ano", "5º ano"
+];
+
+interface Student {
+  id: string;
+  name: string;
+  class: string;
+}
+
 // --- Components ---
 
 const Via = ({ school, studentName, responsavelName, value, monthName, year, installmentNum, totalInstallments, dueDay, isCanhoto }: any) => (
-  <div className={`flex-1 p-2 flex flex-col h-full ${isCanhoto ? 'pr-3 border-r-2 border-dashed border-gray-300' : 'pl-3'}`}>
-    <div className="border border-gray-400 rounded-xl p-4 h-full flex flex-col justify-between bg-white relative overflow-hidden">
-      {/* Decorative background element */}
-      <div className="absolute top-0 right-0 w-16 h-16 bg-gray-50 -mr-8 -mt-8 rotate-45 z-0" />
-      
-      <div className="flex items-start justify-between mb-3 z-10">
-        <div className="flex items-center gap-3">
-          {school.logoUrl && (
-            <img src={school.logoUrl} alt="Logo" className="h-8 w-8 object-contain" />
+  <div className={`p-1 flex flex-row h-full w-full ${isCanhoto ? 'w-[65mm] border-r-2 border-dashed border-gray-300 pr-2' : 'flex-1 pl-2'}`}>
+    <div className="border border-gray-400 rounded-xl p-3 h-full w-full flex flex-col justify-between bg-white relative overflow-hidden">
+      <div className="flex items-start justify-between mb-1">
+        <div className="flex items-center gap-2">
+          {school.logoUrl && !isCanhoto && (
+            <img src={school.logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
           )}
           <div>
-            <h2 className="font-black text-[13px] uppercase leading-tight text-gray-900">{school.name || 'Nome da Instituição'}</h2>
-            <p className="text-[9px] text-gray-500 font-medium uppercase tracking-tight">{school.subtitle || 'Educação de Qualidade'}</p>
+            <h2 className="font-black text-[10px] uppercase leading-tight text-gray-900">{school.name || 'Instituição'}</h2>
+            {!isCanhoto && <p className="text-[7px] text-gray-500 font-medium uppercase">{school.subtitle || 'Educação'}</p>}
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-[8px] text-gray-400 uppercase font-bold tracking-widest mb-1">
-            {isCanhoto ? 'Via da Escola' : 'Via do Aluno'}
-          </span>
-          <div className="bg-gray-950 text-white px-2 py-0.5 rounded text-[10px] font-bold">
-            {installmentNum.toString().padStart(2, '0')}/{totalInstallments.toString().padStart(2, '0')}
+          <span className="text-[7px] text-gray-400 uppercase font-bold">{isCanhoto ? 'Escola' : 'Aluno'}</span>
+          <div className="bg-gray-950 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">
+            {installmentNum}/{totalInstallments}
           </div>
         </div>
       </div>
       
-      <div className="space-y-2.5 text-[11px] text-gray-800 flex-1 flex flex-col justify-center z-10">
-        <div className="flex items-end gap-2">
-          <span className="whitespace-nowrap font-bold text-gray-500 uppercase text-[9px]">Aluno(a):</span>
-          <span className="flex-1 border-b border-gray-300 font-bold text-gray-900 text-[12px] pb-0.5 min-h-[18px]">
+      <div className="space-y-1.5 text-[10px] text-gray-800 flex-1 flex flex-col justify-center">
+        <div className="flex items-end gap-1">
+          <span className="font-bold text-gray-500 uppercase text-[7px]">Aluno:</span>
+          <span className="flex-1 border-b border-gray-200 font-bold text-gray-900 text-[10px] truncate">
             {studentName}
           </span>
         </div>
 
-        <div className="flex items-end gap-2">
-          <span className="whitespace-nowrap font-bold text-gray-500 uppercase text-[9px]">Grupo/ano:</span>
-          <span className="flex-1 border-b border-gray-300 font-bold text-gray-900 text-[12px] pb-0.5 min-h-[18px]">
+        <div className="flex items-end gap-1">
+          <span className="font-bold text-gray-500 uppercase text-[7px]">Grupo:</span>
+          <span className="flex-1 border-b border-gray-200 font-bold text-gray-900 text-[10px] truncate">
             {responsavelName}
           </span>
         </div>
         
-        <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="font-bold text-gray-500 uppercase text-[8px]">Valor R$:</span>
-            <span className="border-b border-gray-300 font-black text-gray-900 text-[13px] pb-0.5 min-h-[20px]">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-500 uppercase text-[7px]">Valor:</span>
+            <span className="font-black text-gray-900 text-[11px]">
               {value ? `R$ ${value}` : ''}
             </span>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-bold text-gray-500 uppercase text-[8px]">Referência:</span>
-            <span className="border-b border-gray-300 font-bold text-gray-900 text-[12px] pb-0.5 min-h-[20px]">
-              {monthName} / {year}
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-500 uppercase text-[7px]">Ref:</span>
+            <span className="font-bold text-gray-900 text-[10px]">
+              {monthName.substring(0,3)}/{year}
             </span>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-bold text-gray-500 uppercase text-[8px]">Vencimento:</span>
-            <span className="border-b border-gray-300 font-black text-red-600 text-[13px] pb-0.5 min-h-[20px]">
-              {dueDay} / {installmentNum.toString().padStart(2, '0')}
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-500 uppercase text-[7px]">Vcto:</span>
+            <span className="font-black text-red-600 text-[11px]">
+              {dueDay}/{installmentNum.toString().padStart(2, '0')}
             </span>
-          </div>
-        </div>
-
-        <div className="flex items-end justify-between mt-2 pt-2 border-t border-gray-100">
-          <div className="flex flex-col gap-1">
-             <span className="font-bold text-gray-500 uppercase text-[8px]">Pagamento:</span>
-             <div className="text-gray-300 tracking-tighter text-[10px]">____/____/____</div>
-          </div>
-          <div className="flex flex-col items-end w-1/2 gap-1">
-            <div className="border-b border-gray-400 w-full mb-1"></div>
-            <span className="font-bold text-gray-400 uppercase text-[8px]">Assinatura Autorizada</span>
           </div>
         </div>
       </div>
 
-      {school.address && (
-        <div className="mt-2 text-[7px] text-gray-400 text-center italic border-t border-gray-50 pt-1">
-          {school.address} {school.cnpj ? `| CNPJ: ${school.cnpj}` : ''}
+      <div className="flex items-end justify-between mt-1 pt-1 border-t border-gray-100">
+        <div className="flex flex-col">
+           <span className="font-bold text-gray-500 uppercase text-[6px]">Pagamento: ____/____/____</span>
         </div>
-      )}
+        {!isCanhoto && (
+          <div className="flex flex-col items-end w-1/3">
+            <div className="border-b border-gray-300 w-full mb-0.5"></div>
+            <span className="font-bold text-gray-400 uppercase text-[6px]">Assinatura</span>
+          </div>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -178,67 +178,60 @@ const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
   const pixPayload = generatePixPayload('71988628791', school.name || 'INSTITUICAO');
 
   return (
-    <div className="flex w-full h-full items-center justify-between p-4 print:p-0">
-      <div className="border-2 border-brand-900 rounded-2xl w-full h-full flex flex-row items-center p-3 md:p-5 relative overflow-hidden bg-white gap-4 shadow-inner">
+    <div className="flex w-full h-full items-center justify-between p-1 bg-white">
+      <div className="border-2 border-brand-900 rounded-2xl w-full h-full flex flex-row items-center p-4 relative overflow-hidden bg-white gap-6">
         <div className="absolute top-0 left-0 w-2 h-full bg-brand-600"></div>
-        <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-brand-50 rounded-full opacity-50"></div>
         
         {/* Left: Logo & Title */}
-        <div className="flex flex-col items-center justify-center gap-1.5 w-[35%] z-10 border-r border-gray-100 pr-4">
+        <div className="flex flex-col items-center justify-center gap-2 w-[30%] border-r border-gray-100 pr-4">
           {school.logoUrl ? (
-            <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-50">
-               <img src={school.logoUrl} alt="Logo" className="h-10 md:h-12 object-contain" />
-            </div>
+             <img src={school.logoUrl} alt="Logo" className="h-14 object-contain" />
           ) : (
-            <div className="h-12 w-12 bg-brand-50 border border-brand-200 border-dashed flex items-center justify-center rounded-2xl text-brand-400 text-xs shrink-0">
-              <School className="w-6 h-6" />
+            <div className="h-12 w-12 bg-brand-50 border border-brand-200 border-dashed flex items-center justify-center rounded-2xl text-brand-400">
+              <School className="w-8 h-8" />
             </div>
           )}
           <div className="text-center">
-            <h1 className="text-sm md:text-base font-black text-brand-900 uppercase tracking-tight leading-tight">{school.name || 'NOME DA ESCOLA'}</h1>
-            <h2 className="text-[7px] text-gray-500 uppercase tracking-[0.1em] font-semibold">{school.subtitle || 'Educação e Transformação'}</h2>
+            <h1 className="text-sm font-black text-brand-900 uppercase leading-tight">{school.name || 'NOME DA ESCOLA'}</h1>
           </div>
         </div>
         
         {/* Middle: Info */}
-        <div className="flex-1 space-y-2 z-10 py-1">
+        <div className="flex-1 space-y-3">
           <div className="flex flex-col">
-            <span className="text-[7px] font-bold text-brand-600 uppercase tracking-widest leading-none mb-0.5">Carnê de Pagamento</span>
-            <span className="text-sm font-black text-gray-900 leading-none">ANO LETIVO {year}</span>
+            <span className="text-[10px] font-black text-brand-600 uppercase tracking-widest">Carnê de Pagamento</span>
+            <span className="text-lg font-black text-gray-900 leading-none">ANO LETIVO {year}</span>
           </div>
           
-          <div className="grid grid-cols-1 gap-1.5 pt-1">
-            <div className="flex flex-col border-l border-brand-200 pl-2">
-              <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Aluno(a)</span>
-              <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{studentName || '__________________'}</span>
+          <div className="space-y-2">
+            <div className="flex flex-col border-l-2 border-brand-200 pl-3">
+              <span className="text-[8px] font-bold text-gray-400 uppercase">Aluno(a)</span>
+              <span className="font-bold text-gray-900 text-sm uppercase">{studentName || '__________________'}</span>
             </div>
             
-            <div className="flex flex-col border-l border-brand-200 pl-2">
-              <span className="text-[7px] font-bold text-gray-400 uppercase leading-none mb-0.5">Grupo/ano</span>
-              <span className="font-bold text-gray-900 text-[11px] uppercase truncate">{responsavelName || '__________________'}</span>
-            </div>
-          </div>
-  
-          <div className="pt-1.5 flex items-center justify-between border-t border-gray-50 mt-1">
-            <div className="text-[7px] text-gray-400 w-full leading-tight truncate">
-              {school.address} {school.cnpj ? `| CNPJ: ${school.cnpj}` : ''}
+            <div className="flex flex-col border-l-2 border-brand-200 pl-3">
+              <span className="text-[8px] font-bold text-gray-400 uppercase">Grupo/ano</span>
+              <span className="font-bold text-gray-900 text-sm uppercase">{responsavelName || '__________________'}</span>
             </div>
           </div>
         </div>
 
         {/* Right: Pix Payment */}
-        <div className="w-[25%] flex flex-col items-center justify-center gap-1.5 p-2 bg-brand-50 rounded-2xl border border-brand-100 z-10">
-          <span className="text-[6px] font-black text-brand-900 uppercase tracking-tighter text-center leading-tight">
-            Pagamentos em PIX<br/>até dia 10 pague com desconto
+        <div className="w-[28%] flex flex-col items-center justify-center gap-1.5 p-3 bg-brand-50 rounded-2xl border border-brand-100">
+          <span className="text-[7px] font-black text-brand-900 uppercase text-center leading-tight">
+            Pague via PIX
           </span>
-          <div className="bg-white p-1 rounded-lg shadow-sm border border-brand-200">
+          <div className="bg-white p-1 rounded-lg border border-brand-200">
             <img 
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pixPayload)}`} 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixPayload)}`} 
               alt="Pix QR Code" 
-              className="w-12 h-12"
+              className="w-16 h-16"
             />
           </div>
-          <span className="text-[5px] font-bold text-gray-400 uppercase tracking-widest">Copia e Cola</span>
+          <div className="flex flex-col items-center">
+            <span className="text-[6px] font-bold text-gray-400 uppercase">Chave Pix:</span>
+            <span className="text-[9px] font-black text-brand-700">71988628791</span>
+          </div>
         </div>
       </div>
     </div>
@@ -247,7 +240,11 @@ const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
 
 export default function App() {
   // --- State ---
-  const [activeTab, setActiveTab] = useState<'config' | 'school'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'school' | 'students'>('config');
+  const [students, setStudents] = useState<Student[]>(() => {
+    const saved = localStorage.getItem('enrolled_students');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [school, setSchool] = useState<SchoolData>(() => {
     const saved = localStorage.getItem('school_data');
     return saved ? JSON.parse(saved) : {
@@ -280,8 +277,13 @@ export default function App() {
     const saved = localStorage.getItem('batch_covers');
     return saved ? JSON.parse(saved) : [];
   });
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
 
   // --- Effects ---
+  useEffect(() => {
+    localStorage.setItem('enrolled_students', JSON.stringify(students));
+  }, [students]);
+
   useEffect(() => {
     localStorage.setItem('school_data', JSON.stringify(school));
   }, [school]);
@@ -372,6 +374,31 @@ export default function App() {
     }, 500);
   };
 
+  const addStudent = (name: string, studentClass: string) => {
+    if (!name || !studentClass) return;
+    const newStudent: Student = {
+      id: Date.now().toString(),
+      name: name.toUpperCase(),
+      class: studentClass
+    };
+    setStudents(prev => [...prev, newStudent]);
+  };
+
+  const removeStudent = (id: string) => {
+    if (confirm("Deseja remover este aluno?")) {
+      setStudents(prev => prev.filter(s => s.id !== id));
+    }
+  };
+
+  const selectStudent = (student: Student) => {
+    setConfig(prev => ({
+      ...prev,
+      studentName: student.name,
+      responsavelName: student.class
+    }));
+    setStudentSearchTerm('');
+  };
+
   return (
     <div className="min-h-screen bg-brand-50 font-sans print:bg-white print:p-0 selection:bg-brand-100">
       
@@ -389,6 +416,13 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button 
+               onClick={() => setActiveTab('students')}
+               className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 font-bold text-sm ${activeTab === 'students' ? 'bg-brand-50 text-brand-600 border border-brand-200' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <User className="w-4 h-4" />
+              Alunos
+            </button>
             <button 
               onClick={handlePrintBatch}
               className="bg-white text-brand-600 border border-brand-200 px-4 py-2.5 rounded-xl hover:bg-brand-50 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm"
@@ -441,9 +475,48 @@ export default function App() {
                     className="space-y-5"
                   >
                     <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2 relative">
+                        <label className="text-[11px] font-black text-gray-400 uppercase mb-1.5 flex items-center gap-1.5 ml-1">
+                          <User className="w-3 h-3" /> Buscar Aluno Matriculado
+                        </label>
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            placeholder="Digite o nome para buscar..."
+                            value={studentSearchTerm}
+                            onChange={e => setStudentSearchTerm(e.target.value)}
+                            className="w-full bg-blue-50/50 border border-brand-100 rounded-2xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all font-bold"
+                          />
+                          <AnimatePresence>
+                            {studentSearchTerm && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute z-50 left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto"
+                              >
+                                {students.filter(s => s.name.toLowerCase().includes(studentSearchTerm.toLowerCase())).length > 0 ? (
+                                  students.filter(s => s.name.toLowerCase().includes(studentSearchTerm.toLowerCase())).map(student => (
+                                    <button
+                                      key={student.id}
+                                      onClick={() => selectStudent(student)}
+                                      className="w-full text-left px-4 py-3 hover:bg-brand-50 border-b border-gray-50 last:border-0 transition-colors"
+                                    >
+                                      <div className="font-bold text-gray-900 text-sm">{student.name}</div>
+                                      <div className="text-[10px] text-brand-600 font-bold uppercase">{student.class}</div>
+                                    </button>
+                                  ))
+                                ) : (
+                                  <div className="px-4 py-3 text-xs text-gray-400 italic">Nenhum aluno encontrado</div>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
                       <div className="col-span-2">
                         <label className="text-[11px] font-black text-gray-400 uppercase mb-1.5 flex items-center gap-1.5 ml-1">
-                          <User className="w-3 h-3" /> Aluno(a)
+                          <User className="w-3 h-3" /> Nome no Carnê
                         </label>
                         <input 
                           type="text" 
@@ -557,6 +630,89 @@ export default function App() {
                       </div>
                     )}
                   </motion.div>
+                ) : activeTab === 'students' ? (
+                  <motion.div 
+                    key="students"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    className="space-y-6"
+                  >
+                    <div className="bg-brand-50 p-6 rounded-2xl border border-brand-100">
+                      <h4 className="text-xs font-black text-brand-900 uppercase mb-4 flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Nova Matrícula
+                      </h4>
+                      <div className="space-y-4">
+                        <input 
+                          type="text" 
+                          id="new-student-name"
+                          placeholder="Nome Completo do Aluno"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none font-bold"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const nameInput = document.getElementById('new-student-name') as HTMLInputElement;
+                              const classInput = document.getElementById('new-student-class') as HTMLSelectElement;
+                              addStudent(nameInput.value, classInput.value);
+                              nameInput.value = '';
+                            }
+                          }}
+                        />
+                        <div className="flex gap-3">
+                          <select 
+                            id="new-student-class"
+                            className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none font-bold"
+                          >
+                            <option value="">Selecione a Classe</option>
+                            {SCHOOL_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <button 
+                            onClick={() => {
+                              const nameInput = document.getElementById('new-student-name') as HTMLInputElement;
+                              const classInput = document.getElementById('new-student-class') as HTMLSelectElement;
+                              if (nameInput.value && classInput.value) {
+                                addStudent(nameInput.value, classInput.value);
+                                nameInput.value = '';
+                                classInput.value = '';
+                              } else {
+                                alert("Preencha nome e classe.");
+                              }
+                            }}
+                            className="bg-brand-600 text-white px-6 rounded-xl font-bold hover:bg-brand-700 transition-colors"
+                          >
+                            Matricular
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between px-2">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Alunos Matriculados ({students.length})</h4>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                        {students.length === 0 ? (
+                           <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-400 text-xs italic">
+                             Nenhum aluno matriculado ainda.
+                           </div>
+                        ) : (
+                          students.map(student => (
+                            <div key={student.id} className="bg-white border border-gray-100 p-3 rounded-xl flex items-center justify-between group hover:border-brand-200 transition-all shadow-sm">
+                              <div>
+                                <div className="font-bold text-gray-900 text-sm">{student.name}</div>
+                                <div className="text-[10px] text-brand-600 font-bold uppercase">{student.class}</div>
+                              </div>
+                              <button 
+                                onClick={() => removeStudent(student.id)}
+                                className="text-gray-300 hover:text-red-500 transition-colors p-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
                 ) : (
                   <motion.div 
                     key="school"
@@ -640,7 +796,7 @@ export default function App() {
                 <ul className="text-[11px] text-brand-100 space-y-2 font-medium">
                   <li className="flex items-start gap-2">
                     <span className="bg-white/20 w-4 h-4 rounded-full flex items-center justify-center text-[8px] mt-0.5">1</span>
-                    Use papel <strong>A4</strong> em orientação <strong>Paisagem</strong> (Horizontal).
+                    Use papel <strong>A4</strong> em orientação <strong>Retrato</strong> (Portrait).
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-white/20 w-4 h-4 rounded-full flex items-center justify-center text-[8px] mt-0.5">2</span>
@@ -648,7 +804,7 @@ export default function App() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-white/20 w-4 h-4 rounded-full flex items-center justify-center text-[8px] mt-0.5">3</span>
-                    Habilite a opção <strong>"Gráficos de segundo plano"</strong> se as cores não aparecerem.
+                    O sistema imprime <strong>4 parcelas por página</strong>.
                   </li>
                 </ul>
               </div>
@@ -672,7 +828,7 @@ export default function App() {
                 />
                 <span className="text-[10px] font-bold text-gray-500 group-hover:text-brand-600 transition-colors uppercase tracking-widest">Incluir Capa</span>
               </label>
-              <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">A4 Landscape Match</span>
+              <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">A4 Portrait (4 units/page)</span>
             </div>
           </div>
 
@@ -768,6 +924,57 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+            background: white !important;
+          }
+          .print-hidden {
+            display: none !important;
+          }
+          .print-break-after-page {
+            page-break-after: always;
+          }
+          .print-break-inside-avoid {
+            page-break-inside: avoid;
+          }
+        }
+        
+        /* Print Layout Helpers */
+        .carne-container {
+          width: 210mm;
+          margin: 0 auto;
+          background: white;
+        }
+        .carne-strip {
+          height: 74.25mm;
+          width: 210mm;
+          overflow: hidden;
+          box-sizing: border-box;
+          border-bottom: 1px dashed #eee;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #ddd;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #ccc;
+        }
+      `}} />
 
       {/* Footer Branding - Hidden when printing */}
       <footer className="max-w-7xl mx-auto px-4 py-12 border-t border-gray-200 print-hidden">
