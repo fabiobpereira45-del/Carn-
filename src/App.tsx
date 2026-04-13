@@ -292,8 +292,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'config' | 'school' | 'students'>('config');
   const [students, setStudents] = useState<Student[]>(() => {
     const saved = localStorage.getItem('enrolled_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
+    const parsed = saved ? JSON.parse(saved) : [];
+    return parsed.length > 0 ? parsed : INITIAL_STUDENTS;
   });
+  const [selectedFilterGroup, setSelectedFilterGroup] = useState<string>('');
   const [school, setSchool] = useState<SchoolData>(() => {
     const saved = localStorage.getItem('school_data');
     return saved ? JSON.parse(saved) : {
@@ -524,43 +526,60 @@ export default function App() {
                     className="space-y-5"
                   >
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2 relative">
-                        <label className="text-[11px] font-black text-gray-400 uppercase mb-1.5 flex items-center gap-1.5 ml-1">
-                          <User className="w-3 h-3" /> Buscar Aluno Matriculado
-                        </label>
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            placeholder="Digite o nome para buscar..."
-                            value={studentSearchTerm}
-                            onChange={e => setStudentSearchTerm(e.target.value)}
-                            className="w-full bg-blue-50/50 border border-brand-100 rounded-2xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all font-bold"
-                          />
-                          <AnimatePresence>
-                            {studentSearchTerm && (
-                              <motion.div 
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="absolute z-50 left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-60 overflow-y-auto"
-                              >
-                                {students.filter(s => s.name.toLowerCase().includes(studentSearchTerm.toLowerCase())).length > 0 ? (
-                                  students.filter(s => s.name.toLowerCase().includes(studentSearchTerm.toLowerCase())).map(student => (
-                                    <button
-                                      key={student.id}
-                                      onClick={() => selectStudent(student)}
-                                      className="w-full text-left px-4 py-3 hover:bg-brand-50 border-b border-gray-50 last:border-0 transition-colors"
-                                    >
-                                      <div className="font-bold text-gray-900 text-sm">{student.name}</div>
-                                      <div className="text-[10px] text-brand-600 font-bold uppercase">{student.class}</div>
-                                    </button>
-                                  ))
-                                ) : (
-                                  <div className="px-4 py-3 text-xs text-gray-400 italic">Nenhum aluno encontrado</div>
-                                )}
-                              </motion.div>
+                      <div className="col-span-2 space-y-3 p-4 bg-brand-50/50 rounded-3xl border border-brand-100">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-black text-brand-600 uppercase mb-1.5 flex items-center gap-1.5 ml-1">
+                              <Layers className="w-3 h-3" /> Filtrar por Grupo
+                            </label>
+                            <select 
+                              value={selectedFilterGroup}
+                              onChange={e => setSelectedFilterGroup(e.target.value)}
+                              className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none font-bold"
+                            >
+                              <option value="">Todos os Grupos</option>
+                              {SCHOOL_CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-black text-brand-600 uppercase mb-1.5 flex items-center gap-1.5 ml-1">
+                              <User className="w-3 h-3" /> Buscar por Nome
+                            </label>
+                            <input 
+                              type="text" 
+                              placeholder="Digite..."
+                              value={studentSearchTerm}
+                              onChange={e => setStudentSearchTerm(e.target.value)}
+                              className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-brand-500 outline-none font-bold"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1 block">
+                            Selecione o Aluno ({students.filter(s => (!selectedFilterGroup || s.class === selectedFilterGroup) && (!studentSearchTerm || s.name.toLowerCase().includes(studentSearchTerm.toLowerCase()))).length})
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                            {students
+                              .filter(s => (!selectedFilterGroup || s.class === selectedFilterGroup) && (!studentSearchTerm || s.name.toLowerCase().includes(studentSearchTerm.toLowerCase())))
+                              .sort((a,b) => a.name.localeCompare(b.name))
+                              .map(student => (
+                                <button
+                                  key={student.id}
+                                  onClick={() => selectStudent(student)}
+                                  className="text-left px-3 py-2 bg-white border border-gray-100 hover:border-brand-300 hover:bg-brand-50 rounded-xl transition-all shadow-sm group active:scale-[0.98]"
+                                >
+                                  <div className="font-bold text-gray-900 text-[10px] leading-tight truncate uppercase">{student.name}</div>
+                                  <div className="text-[8px] text-brand-600 font-bold uppercase truncate">{student.class}</div>
+                                </button>
+                              ))
+                            }
+                            {students.filter(s => (!selectedFilterGroup || s.class === selectedFilterGroup) && (!studentSearchTerm || s.name.toLowerCase().includes(studentSearchTerm.toLowerCase()))).length === 0 && (
+                              <div className="col-span-2 py-8 text-center text-[10px] text-gray-400 bg-white/50 rounded-xl border border-dashed border-gray-100">
+                                Nenhum aluno encontrado neste filtro
+                              </div>
                             )}
-                          </AnimatePresence>
+                          </div>
                         </div>
                       </div>
                       <div className="col-span-2">
