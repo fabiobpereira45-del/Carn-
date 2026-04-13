@@ -483,11 +483,6 @@ export default function App() {
     addStudent(name, studentClass);
   };
 
-  const removeStudent = (id: string) => {
-    if (confirm("Deseja remover este aluno?")) {
-      setStudents(prev => prev.filter(s => s.id !== id));
-    }
-  };
 
   const selectStudent = (student: Student) => {
     setConfig(prev => ({
