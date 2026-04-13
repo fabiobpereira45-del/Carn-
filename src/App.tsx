@@ -306,6 +306,7 @@ export default function App() {
     return parsed.length > 0 ? parsed : INITIAL_STUDENTS;
   });
   const [selectedFilterGroup, setSelectedFilterGroup] = useState<string>('');
+  const [isSavingSchool, setIsSavingSchool] = useState(false);
   const [school, setSchool] = useState<SchoolData>(() => {
     const saved = localStorage.getItem('school_data');
     return saved ? JSON.parse(saved) : {
@@ -407,11 +408,16 @@ export default function App() {
   };
 
   const saveSchool = async (newData: SchoolData) => {
+    setIsSavingSchool(true);
     setSchool(newData);
     const { error } = await supabase.from('school_data').upsert([{ id: 1, ...newData }]);
+    setIsSavingSchool(false);
+    
     if (error) {
       console.error("Erro ao salvar dados da escola:", error);
       alert("Erro ao sincronizar com o banco: " + error.message);
+    } else {
+      alert("Configurações da escola salvas com sucesso!");
     }
   };
 
@@ -887,7 +893,7 @@ export default function App() {
                          onClick={() => saveSchool(school)}
                          className="bg-brand-600 text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-brand-700 transition-colors shadow-lg shadow-brand-100"
                        >
-                         Salvar Dados
+                         {isSavingSchool ? 'Salvando...' : 'Salvar Dados'}
                        </button>
                     </div>
                     
