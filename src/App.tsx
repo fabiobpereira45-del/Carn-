@@ -90,7 +90,56 @@ const months = [
 ];
 
 const SCHOOL_CLASSES = [
-  "G2", "G3", "G4", "G5", "1º ano", "2º ano", "3º ano", "4º ano", "5º ano"
+  "G2", "G3", "G3 - Matutino", "G4", "G5", "G5 - Matutino", "1º Ano", "2º Ano", "3º Ano", "4º Ano", "5º Ano"
+];
+
+const INITIAL_STUDENTS: Student[] = [
+  { id: "s1", name: "CECÍLIA SANTANA SANTOS", class: "G3 - Matutino" },
+  { id: "s2", name: "ZOE SANTANA GONÇALVES", class: "G3 - Matutino" },
+  { id: "s3", name: "THAEL BRENO SANTOS SILVA", class: "G4" },
+  { id: "s4", name: "AGATHA SOFIA DE MORAES GUNDIM", class: "G4" },
+  { id: "s5", name: "LORENA DA SILVA DE JESUS", class: "G5 - Matutino" },
+  { id: "s6", name: "APOLO DE JESUS DOS SANTOS RIOS", class: "G5 - Matutino" },
+  { id: "s7", name: "BERNARDO MUNIZ BARRETO PEREIRA", class: "G5 - Matutino" },
+  { id: "s8", name: "MIGUEL BARRETO DE JESUS", class: "G5 - Matutino" },
+  { id: "s9", name: "RODRIGO SODRÉ DOS SANTOS", class: "G5 - Matutino" },
+  { id: "s10", name: "KENNEDY LUIZ DE JESUS SANTOS", class: "1º Ano" },
+  { id: "s11", name: "ELISA MENEZES ANDRADE", class: "1º Ano" },
+  { id: "s12", name: "SOPHIA LUIZ DE JESUS SANTOS", class: "1º Ano" },
+  { id: "s13", name: "ELOÁH CARVALHO DOS SANTOS DE JESUS", class: "1º Ano" },
+  { id: "s14", name: "JOSÉ NETO DE JESUS LOPES", class: "1º Ano" },
+  { id: "s15", name: "ÍCARO FARIAS BRITO", class: "1º Ano" },
+  { id: "s16", name: "MARIA LUIZA ROCHA SOUZA", class: "1º Ano" },
+  { id: "s17", name: "TARCIELE SANTANA DA SILVA", class: "1º Ano" },
+  { id: "s18", name: "THEO SANTOS SILVA", class: "2º Ano" },
+  { id: "s19", name: "RUAN GABRIEL FARIAS DANTAS", class: "2º Ano" },
+  { id: "s20", name: "ALICE BARRETO CONCEIÇÃO DOS SANTOS", class: "2º Ano" },
+  { id: "s21", name: "TYLER QUADROS LIMA", class: "2º Ano" },
+  { id: "s22", name: "RYAN VICTOR SANTOS MOURA", class: "2º Ano" },
+  { id: "s23", name: "SOPHIA RAFELLY FERREIRA DE BARROS", class: "2º Ano" },
+  { id: "s24", name: "ARTHUR BENJAMIM PASCOAL ALMEIDA", class: "2º Ano" },
+  { id: "s25", name: "HELOÍSA FAGUNDES DE SANTANA", class: "4º Ano" },
+  { id: "s26", name: "CECÍLIA M. SOUZA GUERREIRO", class: "4º Ano" },
+  { id: "s27", name: "LAÍS RODRIGUES DAMASCENO", class: "4º Ano" },
+  { id: "s28", name: "HANNA LUIZ DOS SANTOS PEREIRA", class: "4º Ano" },
+  { id: "s29", name: "PEDRO HENRIQUE ANDRADE DE MELO", class: "4º Ano" },
+  { id: "s30", name: "RAVI DOS SANTOS SOARES", class: "4º Ano" },
+  { id: "s31", name: "PEDRO DAMASCENO COSTA", class: "4º Ano" },
+  { id: "s32", name: "NICOLLE DE OLIVEIRA FREITAS", class: "5º Ano" },
+  { id: "s33", name: "GUILHERME DOS SANTOS SILVA", class: "5º Ano" },
+  { id: "s34", name: "MARIA ESTHER DA SILVA SANTOS", class: "5º Ano" },
+  { id: "s35", name: "KAUÊ BARRETO REIS", class: "5º Ano" },
+  { id: "s36", name: "HADASSA NEVES PINHO SILVA", class: "5º Ano" },
+  { id: "s37", name: "BRUNO BENTO SANTOS BRASILEIRO", class: "5º Ano" },
+  { id: "s38", name: "GABRIEL VICTOR PAIXÃO FAGUNDES VIEIRA", class: "5º Ano" },
+  { id: "s39", name: "LEVI ROCHA LINS", class: "5º Ano" },
+  { id: "s40", name: "RENAN RUAS PINTO DOS SANTOS", class: "5º Ano" },
+  { id: "s41", name: "EVELLIN VITÓRIA DE ALMEIDA XAVIER", class: "5º Ano" },
+  { id: "s42", name: "KEIZZY KEIRA SILVA DE JESUS", class: "5º Ano" },
+  { id: "s43", name: "AGATHE SOPHIA SOUZA DOS SANTOS", class: "5º Ano" },
+  { id: "s44", name: "DAVI OLIVEIRA DOS SANTOS", class: "5º Ano" },
+  { id: "s45", name: "THAÍS IVANILDE TAVARES DOS SANTOS", class: "5º Ano" },
+  { id: "s46", name: "ANTHONY SANTOS SOUZA", class: "5º Ano" }
 ];
 
 interface Student {
@@ -243,7 +292,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'config' | 'school' | 'students'>('config');
   const [students, setStudents] = useState<Student[]>(() => {
     const saved = localStorage.getItem('enrolled_students');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
   });
   const [school, setSchool] = useState<SchoolData>(() => {
     const saved = localStorage.getItem('school_data');
