@@ -37,8 +37,9 @@ function crc16(data: string): string {
   return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
 }
 
-function generatePixPayload(key: string, name: string, city: string = 'SAO PAULO'): string {
-  const cleanKey = key.replace(/\D/g, '');
+function generatePixPayload(key: string, name: string, city: string = 'SAO PAULO', txid: string = 'o4fjEM5svW'): string {
+  // DO NOT strip characters for Pix keys (they can be UUIDs, emails, etc.)
+  const cleanKey = key.trim(); 
   const cleanName = name.substring(0, 25).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z ]/g, "");
   const cleanCity = city.substring(0, 15).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z ]/g, "");
 
@@ -52,7 +53,9 @@ function generatePixPayload(key: string, name: string, city: string = 'SAO PAULO
   const countryCode = '5802BR';
   const merchantNameField = `59${cleanName.length.toString().padStart(2, '0')}${cleanName}`;
   const merchantCityField = `60${cleanCity.length.toString().padStart(2, '0')}${cleanCity}`;
-  const additionalDataField = '62070503***';
+  
+  const txidField = `05${txid.length.toString().padStart(2, '0')}${txid}`;
+  const additionalDataField = `62${txidField.length.toString().padStart(2, '0')}${txidField}`;
   
   const payloadWithoutCRC = `${formatIdentifier}${merchantAccountInfo}${merchantCategoryCode}${transactionCurrency}${countryCode}${merchantNameField}${merchantCityField}${additionalDataField}6304`;
   return `${payloadWithoutCRC}${crc16(payloadWithoutCRC)}`;
@@ -225,7 +228,13 @@ const Via = ({ school, studentName, responsavelName, value, monthName, year, ins
 );
 
 const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
-  const pixPayload = generatePixPayload('71988628791', school.name || 'INSTITUICAO');
+  // Using the verified payload details provided by the user
+  const pixPayload = generatePixPayload(
+    'c79892a8-7022-44c4-b58d-eeb16e7d1ab2', 
+    'Gilcelia Santos Barreto',
+    'SAO PAULO',
+    'o4fjEM5svW'
+  );
 
   return (
     <div className="flex w-full h-full items-center justify-between p-1 bg-white">
@@ -267,7 +276,7 @@ const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
         </div>
 
         {/* Right: Pix Payment */}
-        <div className="w-[28%] flex flex-col items-center justify-center gap-1.5 p-3 bg-brand-50 rounded-2xl border border-brand-100">
+        <div className="w-[30%] flex flex-col items-center justify-center gap-1.5 p-3 bg-brand-50 rounded-2xl border border-brand-100">
           <span className="text-[7px] font-black text-brand-900 uppercase text-center leading-tight">
             Pague via PIX
           </span>
@@ -275,12 +284,12 @@ const CoverSheet = ({ school, studentName, responsavelName, year }: any) => {
             <img 
               src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixPayload)}`} 
               alt="Pix QR Code" 
-              className="w-16 h-16"
+              className="w-20 h-20"
             />
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-[6px] font-bold text-gray-400 uppercase">Chave Pix:</span>
-            <span className="text-[9px] font-black text-brand-700">71988628791</span>
+            <span className="text-[6px] font-bold text-gray-400 uppercase">Beneficiário:</span>
+            <span className="text-[8px] font-black text-brand-700 uppercase">Gilcelia Santos Barreto</span>
           </div>
         </div>
       </div>
