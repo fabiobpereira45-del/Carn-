@@ -151,7 +151,7 @@ interface Student {
 // --- Components ---
 
 const Via = ({ school, studentName, responsavelName, value, monthName, year, installmentNum, totalInstallments, dueDay, isCanhoto }: any) => (
-  <div className={`p-1 flex flex-row h-full w-full ${isCanhoto ? 'w-[65mm] border-r-2 border-dashed border-gray-300 pr-2' : 'flex-1 pl-2'}`}>
+  <div className={`p-1 flex flex-row h-full w-full ${isCanhoto ? 'w-[50mm] border-r-2 border-dashed border-gray-300 pr-1' : 'flex-1 pl-3'}`}>
     <div className="border border-gray-400 rounded-xl p-3 h-full w-full flex flex-col justify-between bg-white relative overflow-hidden">
       <div className="flex items-start justify-between mb-1">
         <div className="flex items-center gap-2">
@@ -186,22 +186,22 @@ const Via = ({ school, studentName, responsavelName, value, monthName, year, ins
           </span>
         </div>
         
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col">
-            <span className="font-bold text-gray-500 uppercase text-[7px]">Valor:</span>
-            <span className="font-black text-gray-900 text-[11px]">
+        <div className="flex flex-row items-end justify-between gap-2 overflow-hidden">
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-gray-500 uppercase text-[7px] truncate">Valor:</span>
+            <span className="font-black text-gray-900 text-[10px] truncate">
               {value ? `R$ ${value}` : ''}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-gray-500 uppercase text-[7px]">Ref:</span>
-            <span className="font-bold text-gray-900 text-[10px]">
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-gray-500 uppercase text-[7px] truncate">Referência:</span>
+            <span className="font-bold text-gray-900 text-[9px] truncate">
               {monthName.substring(0,3)}/{year}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-gray-500 uppercase text-[7px]">Vcto:</span>
-            <span className="font-black text-red-600 text-[11px]">
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-gray-500 uppercase text-[7px] truncate">Vencimento:</span>
+            <span className="font-black text-red-600 text-[10px] truncate">
               {dueDay}/{installmentNum.toString().padStart(2, '0')}
             </span>
           </div>
