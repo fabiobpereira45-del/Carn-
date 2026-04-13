@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from './supabaseClient';
 
 
 // --- Pix Helpers ---
@@ -336,16 +337,59 @@ export default function App() {
   }, [students]);
 
   useEffect(() => {
-    localStorage.setItem('school_data', JSON.stringify(school));
-  }, [school]);
+    const fetchData = async () => {
+      // Fetch School Data
+      const { data: schoolRes } = await supabase.from('school_data').select('*').single();
+      if (schoolRes) {
+        setSchool(schoolRes);
+      } else {
+        // If no school data in DB, sync the current one (if exists in state/localStorage)
+        await supabase.from('school_data').insert([{ id: 1, ...school }]);
+      }
 
-  useEffect(() => {
-    localStorage.setItem('carnê_config', JSON.stringify(config));
-  }, [config]);
+      // Fetch Students
+      const { data: studentsRes } = await supabase.from('students').select('*');
+      if (studentsRes && studentsRes.length > 0) {
+        setStudents(studentsRes);
+      } else {
+        // If Supabase is empty, UPLOAD initial participants
+        const studentsToUpload = INITIAL_STUDENTS.map(s => ({
+           id: s.id.includes('s') ? undefined : s.id, // Replace dummy IDs with UUIDs if needed, or let DB handle it
+           name: s.name,
+           class: s.class
+        }));
+        const { data: uploaded } = await supabase.from('students').insert(studentsToUpload).select();
+        if (uploaded) setStudents(uploaded);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('batch_covers', JSON.stringify(batchCovers));
-  }, [batchCovers]);
+  // Update handlers to sync with Supabase
+  const addStudent = async (name: string, studentClass: string) => {
+    if (!name || !studentClass) return;
+    const { data, error } = await supabase
+      .from('students')
+      .insert([{ name: name.toUpperCase(), class: studentClass }])
+      .select()
+      .single();
+    
+    if (data) {
+      setStudents(prev => [...prev, data]);
+    } else {
+      console.error(error);
+    }
+  };
+
+  const removeStudent = async (id: string) => {
+    if (confirm("Deseja remover este aluno?")) {
+      const { error } = await supabase.from('students').delete().eq('id', id);
+      if (!error) {
+        setStudents(prev => prev.filter(s => s.id !== id));
+      }
+    }
+  };
 
   // --- Handlers ---
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,7 +401,8 @@ export default function App() {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSchool(prev => ({ ...prev, logoUrl: reader.result as string }));
+        const logoUrl = reader.result as string;
+        saveSchool({ ...school, logoUrl });
       };
       reader.readAsDataURL(file);
     }
@@ -425,14 +470,8 @@ export default function App() {
     }, 500);
   };
 
-  const addStudent = (name: string, studentClass: string) => {
-    if (!name || !studentClass) return;
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      name: name.toUpperCase(),
-      class: studentClass
-    };
-    setStudents(prev => [...prev, newStudent]);
+  const addStudentManual = (name: string, studentClass: string) => {
+    addStudent(name, studentClass);
   };
 
   const removeStudent = (id: string) => {
@@ -722,6 +761,7 @@ export default function App() {
                               const classInput = document.getElementById('new-student-class') as HTMLSelectElement;
                               addStudent(nameInput.value, classInput.value);
                               nameInput.value = '';
+                              classInput.value = '';
                             }
                           }}
                         />
@@ -796,6 +836,7 @@ export default function App() {
                         placeholder="Ex: Escola Primeiras Descobertas"
                         value={school.name}
                         onChange={e => setSchool({...school, name: e.target.value})}
+                        onBlur={() => saveSchool(school)}
                         className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900 outline-none focus:ring-2 focus:ring-brand-500 font-bold"
                       />
                     </div>
@@ -806,6 +847,7 @@ export default function App() {
                         placeholder="Ex: Educação Infantil ao 5º ano"
                         value={school.subtitle}
                         onChange={e => setSchool({...school, subtitle: e.target.value})}
+                        onBlur={() => saveSchool(school)}
                         className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900 outline-none focus:ring-2 focus:ring-brand-500 font-medium"
                       />
                     </div>
@@ -816,8 +858,18 @@ export default function App() {
                         placeholder="Endereço completo, telefone ou email"
                         value={school.address}
                         onChange={e => setSchool({...school, address: e.target.value})}
+                        onBlur={() => saveSchool(school)}
                         className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-900 outline-none focus:ring-2 focus:ring-brand-500 font-medium text-sm"
                       />
+                    </div>
+                    
+                    <div className="flex justify-end pt-2">
+                       <button 
+                         onClick={() => saveSchool(school)}
+                         className="bg-brand-600 text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-brand-700 transition-colors shadow-lg shadow-brand-100"
+                       >
+                         Salvar Dados
+                       </button>
                     </div>
                     
                     <div className="pt-4 border-t border-gray-50">
