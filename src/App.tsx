@@ -411,7 +411,7 @@ export default function App() {
     const { error } = await supabase.from('school_data').upsert([{ id: 1, ...newData }]);
     if (error) {
       console.error("Erro ao salvar dados da escola:", error);
-      alert("Houve um erro ao sincronizar com o banco de dados. Verifique sua conexão.");
+      alert("Erro ao sincronizar com o banco: " + error.message);
     }
   };
 
