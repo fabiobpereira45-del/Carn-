@@ -347,28 +347,32 @@ export default function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch School Data
-      const { data: schoolRes } = await supabase.from('school_data').select('*').single();
-      if (schoolRes) {
-        setSchool(schoolRes);
-      } else {
-        // If no school data in DB, sync the current one (if exists in state/localStorage)
-        await supabase.from('school_data').insert([{ id: 1, ...school }]);
-      }
+      try {
+        // Fetch School Data
+        const { data: schoolRes, error: schoolErr } = await supabase.from('school_data').select('*').single();
+        if (schoolRes) {
+          setSchool(schoolRes);
+        } else if (!schoolErr || schoolErr.code === 'PGRST116') { // PGRST116 is 'no rows'
+          // If no school data in DB, sync the current one
+          await supabase.from('school_data').insert([{ id: 1, ...school }]);
+        }
 
-      // Fetch Students
-      const { data: studentsRes } = await supabase.from('students').select('*');
-      if (studentsRes && studentsRes.length > 0) {
-        setStudents(studentsRes);
-      } else {
-        // If Supabase is empty, UPLOAD initial participants
-        const studentsToUpload = INITIAL_STUDENTS.map(s => ({
-           id: s.id.includes('s') ? undefined : s.id, // Replace dummy IDs with UUIDs if needed, or let DB handle it
-           name: s.name,
-           class: s.class
-        }));
-        const { data: uploaded } = await supabase.from('students').insert(studentsToUpload).select();
-        if (uploaded) setStudents(uploaded);
+        // Fetch Students
+        const { data: studentsRes, error: studentsErr } = await supabase.from('students').select('*');
+        if (studentsRes && studentsRes.length > 0) {
+          setStudents(studentsRes);
+        } else if (studentsRes && studentsRes.length === 0) {
+          // If Supabase is empty, UPLOAD initial participants
+          const studentsToUpload = INITIAL_STUDENTS.map(s => ({
+             name: s.name,
+             class: s.class
+          }));
+          const { data: uploaded, error: uploadErr } = await supabase.from('students').insert(studentsToUpload).select();
+          if (uploaded) setStudents(uploaded);
+          if (uploadErr) console.error("Erro no seed de alunos:", uploadErr);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do Supabase:", err);
       }
     };
     
@@ -396,7 +400,18 @@ export default function App() {
       const { error } = await supabase.from('students').delete().eq('id', id);
       if (!error) {
         setStudents(prev => prev.filter(s => s.id !== id));
+      } else {
+        alert("Erro ao remover aluno: " + error.message);
       }
+    }
+  };
+
+  const saveSchool = async (newData: SchoolData) => {
+    setSchool(newData);
+    const { error } = await supabase.from('school_data').upsert([{ id: 1, ...newData }]);
+    if (error) {
+      console.error("Erro ao salvar dados da escola:", error);
+      alert("Houve um erro ao sincronizar com o banco de dados. Verifique sua conexão.");
     }
   };
 
